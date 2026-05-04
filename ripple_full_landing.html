@@ -1,913 +1,740 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ripple — Stream Music. No Servers.</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0B0B0F;
+      --bg2:#0f0f14;
+      --surface:rgba(255,255,255,0.04);
+      --surface2:rgba(255,255,255,0.07);
+      --border:rgba(255,255,255,0.07);
+      --border2:rgba(255,255,255,0.12);
+      --text:#F2F2F7;
+      --muted:#6E6E7E;
+      --muted2:#9898A8;
+      --v1:#7C3AED;
+      --v2:#4F46E5;
+      --b1:#2563EB;
+      --p1:#EC4899;
+      --p2:#F472B6;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
 
-    :root {
-      --bg:      #0a0a0f;
-      --bg2:     #0f0f1a;
-      --border:  rgba(124,58,237,0.2);
-      --accent:  #7c3aed;
-      --accent2: #f472b6;
-      --text:    #e2e8f0;
-      --text2:   #94a3b8;
-    }
+    /* NAV */
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(11,11,15,0.85);backdrop-filter:blur(20px);border-bottom:0.5px solid var(--border)}
+    .logo-mark{display:flex;align-items:center;gap:10px}
+    .logo-icon{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--v1),var(--p1));display:flex;align-items:center;justify-content:center}
+    .logo-icon svg{width:14px;height:14px}
+    .logo-text{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.5px}
+    .nav-links{display:flex;gap:32px}
+    .nav-links a{color:var(--muted2);font-size:14px;text-decoration:none;cursor:pointer;transition:color 0.2s;font-weight:400}
+    .nav-links a:hover{color:var(--text)}
+    .nav-actions{display:flex;align-items:center;gap:12px}
+    .btn-ghost-sm{background:transparent;border:0.5px solid var(--border2);color:var(--text);padding:8px 18px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s}
+    .btn-ghost-sm:hover{background:var(--surface2)}
+    .btn-primary-sm{background:linear-gradient(135deg,var(--v1),var(--p1));color:#fff;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'Inter',sans-serif}
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
+    /* HERO */
+    .hero{position:relative;min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;overflow:hidden}
+    canvas#network{
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+    .hero-inner{position:relative;z-index:2;max-width:760px}
+    .hero-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(124,58,237,0.12);border:0.5px solid rgba(124,58,237,0.3);padding:7px 16px;border-radius:20px;font-size:12px;color:#a78bfa;margin-bottom:32px;letter-spacing:0.3px}
+    .pill-dot{width:6px;height:6px;border-radius:50%;background:#a78bfa;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.8)}}
+    h1{font-family:'Space Grotesk',sans-serif;font-size:72px;font-weight:700;line-height:1;letter-spacing:-3px;margin-bottom:24px}
+    .grad-text{background:linear-gradient(135deg,#a78bfa 0%,#818cf8 40%,#f472b6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-sub{font-size:18px;color:var(--muted2);line-height:1.7;margin-bottom:40px;font-weight:300;max-width:520px;margin-left:auto;margin-right:auto}
+    .hero-ctас{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:48px}
+    .btn-download{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--v1),var(--b1),var(--p1));background-size:200% 200%;color:#fff;padding:14px 28px;border-radius:12px;font-size:15px;font-weight:500;cursor:pointer;border:none;font-family:'Inter',sans-serif;animation:gradShift 4s ease infinite}
+    @keyframes gradShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .btn-demo{display:flex;align-items:center;gap:8px;background:var(--surface);border:0.5px solid var(--border2);color:var(--text);padding:14px 28px;border-radius:12px;font-size:15px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s}
+    .btn-demo:hover{background:var(--surface2);border-color:rgba(255,255,255,0.2)}
+    .hero-stats{display:flex;gap:0;border:0.5px solid var(--border);border-radius:16px;overflow:hidden;background:rgba(255,255,255,0.025)}
+    .hstat{flex:1;padding:20px 28px;text-align:center}
+    .hstat+.hstat{border-left:0.5px solid var(--border)}
+    .hstat-num{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;background:linear-gradient(135deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hstat-label{font-size:12px;color:var(--muted);margin-top:3px}
 
-    /* ── NAV ── */
-    nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 48px;
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      background: rgba(10,10,15,0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-logo {
-      font-size: 22px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #a78bfa, #f472b6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .nav-links {
-      display: flex;
-      gap: 32px;
-      list-style: none;
-    }
-    .nav-links a {
-      color: var(--text2);
-      text-decoration: none;
-      font-size: 14px;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover { color: var(--text); }
-    .nav-cta {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
-      border: none;
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .nav-cta:hover { opacity: 0.85; }
+    /* WAVEFORM BANNER */
+    .wave-banner{padding:0 48px;margin-bottom:0;position:relative;height:80px;overflow:hidden;opacity:0.35}
+    .wave-banner canvas{width:100%;height:80px}
 
-    /* ── HERO ── */
-    .hero {
-      min-height: 100vh;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 120px 48px 80px;
-      overflow: hidden;
-    }
-    #network {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      max-width: 800px;
-    }
-    .hero-badge {
-      display: inline-block;
-      padding: 6px 16px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: rgba(124,58,237,0.1);
-      font-size: 13px;
-      color: #a78bfa;
-      margin-bottom: 24px;
-    }
-    h1 {
-      font-size: 72px;
-      font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: 24px;
-      background: linear-gradient(135deg, #ffffff 30%, #a78bfa 70%, #f472b6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero-desc {
-      font-size: 18px;
-      color: var(--text2);
-      margin-bottom: 40px;
-      max-width: 560px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hero-btns {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      margin-bottom: 64px;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
-      border: none;
-      padding: 14px 32px;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s, opacity 0.2s;
-    }
-    .btn-primary:hover { transform: translateY(-2px); opacity: 0.9; }
-    .btn-secondary {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 14px 32px;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .btn-secondary:hover { border-color: var(--accent); background: rgba(124,58,237,0.08); }
+    /* FEATURES */
+    .section{padding:100px 48px}
+    .section-eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--v1);font-weight:500;margin-bottom:16px}
+    .section-title{font-family:'Space Grotesk',sans-serif;font-size:42px;font-weight:700;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px}
+    .section-sub{font-size:16px;color:var(--muted2);line-height:1.7;max-width:480px;font-weight:300}
+    .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+    .feat-card{background:var(--surface);border:0.5px solid var(--border);border-radius:20px;padding:32px 28px;transition:all 0.3s;cursor:default;position:relative;overflow:hidden}
+    .feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(124,58,237,0.06),transparent);opacity:0;transition:opacity 0.3s;border-radius:20px}
+    .feat-card:hover{border-color:rgba(124,58,237,0.3);transform:translateY(-2px)}
+    .feat-card:hover::before{opacity:1}
+    .feat-icon{width:48px;height:48px;border-radius:14px;background:rgba(124,58,237,0.1);border:0.5px solid rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:20px}
+    .feat-title{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;margin-bottom:10px}
+    .feat-desc{font-size:14px;color:var(--muted2);line-height:1.7}
+    .feat-tag{display:inline-block;background:rgba(124,58,237,0.08);border:0.5px solid rgba(124,58,237,0.2);border-radius:6px;padding:3px 8px;font-size:11px;color:#a78bfa;margin-top:14px}
 
-    .hero-stats {
-      display: flex;
-      justify-content: center;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: rgba(255,255,255,0.03);
-      backdrop-filter: blur(8px);
-      overflow: hidden;
-    }
-    .hstat {
-      flex: 1;
-      padding: 20px 32px;
-      text-align: center;
-    }
-    .hstat + .hstat { border-left: 1px solid var(--border); }
-    .hstat-val {
-      font-size: 28px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #a78bfa, #f472b6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hstat-label {
-      font-size: 13px;
-      color: var(--text2);
-      margin-top: 4px;
+    /* HOW IT WORKS */
+    .how-section{padding:100px 48px;background:linear-gradient(180deg,transparent,rgba(124,58,237,0.04),transparent)}
+    .steps-container{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:64px}
+    .steps-list{display:flex;flex-direction:column;gap:0}
+    .step{display:flex;gap:20px;padding:28px 0;border-bottom:0.5px solid var(--border);cursor:pointer;transition:all 0.2s}
+    .step:first-child{padding-top:0}
+    .step:last-child{border-bottom:none;padding-bottom:0}
+    .step.active .step-num{background:linear-gradient(135deg,var(--v1),var(--p1));color:#fff;border-color:transparent}
+    .step.active .step-title{color:var(--text)}
+    .step-num{width:36px;height:36px;border-radius:50%;border:0.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:13px;font-family:'Space Grotesk',sans-serif;font-weight:600;color:var(--muted);flex-shrink:0;margin-top:2px;transition:all 0.3s}
+    .step-content{}
+    .step-title{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;color:var(--muted2);margin-bottom:6px;transition:color 0.3s}
+    .step-desc{font-size:14px;color:var(--muted);line-height:1.7}
+    .network-viz{background:var(--surface);border:0.5px solid var(--border);border-radius:24px;overflow:hidden;height:360px;position:relative}
+    canvas#netViz{width:100%;height:100%}
+
+    /* UI PREVIEW */
+    .preview-section{padding:100px 48px}
+    .preview-frame{margin-top:64px;background:rgba(255,255,255,0.025);border:0.5px solid var(--border);border-radius:24px;overflow:hidden}
+    .preview-top{display:flex;align-items:center;gap:8px;padding:16px 20px;border-bottom:0.5px solid var(--border);background:rgba(0,0,0,0.3)}
+    .traffic-dot{width:10px;height:10px;border-radius:50%}
+    .td-r{background:#FF5F57}
+    .td-y{background:#FFBD2E}
+    .td-g{background:#28CA41}
+    .preview-inner{display:grid;grid-template-columns:240px 1fr;min-height:420px}
+    .sidebar{border-right:0.5px solid var(--border);padding:24px 20px;background:rgba(0,0,0,0.2)}
+    .sb-logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:28px;display:flex;align-items:center;gap:8px}
+    .sb-logo-dot{width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,var(--v1),var(--p1));flex-shrink:0}
+    .sb-section{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;margin-top:20px}
+    .sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;color:var(--muted2);cursor:pointer;transition:all 0.2s;margin-bottom:2px}
+    .sb-item:hover,.sb-item.active{background:var(--surface2);color:var(--text)}
+    .sb-item.active{color:#a78bfa}
+    .sb-icon{font-size:15px;width:20px;text-align:center}
+    .main-content{padding:28px;overflow:hidden}
+    .now-playing-bar{background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(244,114,182,0.08));border:0.5px solid rgba(124,58,237,0.2);border-radius:16px;padding:20px;margin-bottom:24px;display:flex;align-items:center;gap:16px}
+    .np-art{width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,#2d1b69,#7c3aed);flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .np-info{flex:1}
+    .np-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;margin-bottom:3px}
+    .np-artist{font-size:12px;color:var(--muted2)}
+    .np-peers{font-size:11px;color:#a78bfa;margin-top:4px;display:flex;align-items:center;gap:4px}
+    .np-ctrl{display:flex;gap:12px;align-items:center}
+    .np-btn{background:none;border:none;color:var(--muted2);font-size:14px;cursor:pointer;padding:6px;border-radius:6px;transition:all 0.2s}
+    .np-btn:hover{color:var(--text);background:var(--surface2)}
+    .np-play{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--v1),var(--p1));border:none;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .tracks-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+    .track-item{display:flex;align-items:center;gap:12px;padding:10px 8px;border-radius:10px;cursor:pointer;transition:all 0.2s;margin-bottom:2px}
+    .track-item:hover{background:var(--surface2)}
+    .track-item.active-track{background:rgba(124,58,237,0.1)}
+    .tr-num{font-size:12px;color:var(--muted);width:16px;text-align:center;flex-shrink:0}
+    .tr-art{width:38px;height:38px;border-radius:7px;flex-shrink:0}
+    .art-g1{background:linear-gradient(135deg,#1a1033,#7c3aed)}
+    .art-g2{background:linear-gradient(135deg,#0f2027,#2563eb)}
+    .art-g3{background:linear-gradient(135deg,#1a0a2e,#ec4899)}
+    .art-g4{background:linear-gradient(135deg,#0d1b2a,#06b6d4)}
+    .tr-info{flex:1}
+    .tr-name{font-size:13px;font-weight:500;margin-bottom:2px}
+    .tr-artist{font-size:11px;color:var(--muted)}
+    .tr-peers{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:3px}
+    .tr-dur{font-size:12px;color:var(--muted)}
+    .peer-badge-sm{width:5px;height:5px;border-radius:50%;background:#a78bfa}
+
+    /* CTA */
+    .cta-section{padding:120px 48px;text-align:center;position:relative;overflow:hidden}
+    .cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(124,58,237,0.15),transparent 70%);pointer-events:none}
+    .cta-inner{position:relative;z-index:2}
+    .cta-title{font-family:'Space Grotesk',sans-serif;font-size:52px;font-weight:700;letter-spacing:-2px;line-height:1.05;margin-bottom:20px}
+    .cta-sub{font-size:17px;color:var(--muted2);margin-bottom:40px;font-weight:300}
+    .cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+    .os-btn{display:flex;align-items:center;gap:10px;background:var(--surface);border:0.5px solid var(--border2);color:var(--text);padding:14px 24px;border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s}
+    .os-btn:hover{background:var(--surface2);border-color:rgba(255,255,255,0.2)}
+    .os-icon{font-size:22px}
+    .os-text-label{font-size:10px;color:var(--muted);text-align:left}
+    .os-text-name{font-size:14px;font-weight:500;text-align:left}
+
+    /* FOOTER */
+    footer{padding:40px 48px;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .foot-logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+    .foot-links{display:flex;gap:28px}
+    .foot-links a{font-size:13px;color:var(--muted);text-decoration:none;cursor:pointer;transition:color 0.2s}
+    .foot-links a:hover{color:var(--text)}
+    .foot-copy{font-size:12px;color:var(--muted)}
+
+    /* ===== Responsive (mobile/tablet) ===== */
+    @media (max-width: 1024px){
+      nav{padding:16px 24px}
+      .section,.how-section,.preview-section,.cta-section{padding:80px 24px}
+      .features-grid{grid-template-columns:repeat(2,1fr)}
+      .steps-container{gap:40px}
+      .section-title{font-size:36px}
+      .cta-title{font-size:44px}
     }
 
-    /* ── SHARED SECTION STYLES ── */
-    .section, .how-section, .preview-section, .netviz-section, .cta-section { padding: 100px 48px; }
-    .how-section, .netviz-section { background: var(--bg2); }
-    .cta-section { text-align: center; position: relative; overflow: hidden; }
+    @media (max-width: 768px){
+      nav{padding:14px 16px}
+      .nav-links{display:none}
+      .nav-actions{gap:8px}
+      .btn-ghost-sm,.btn-primary-sm{padding:8px 14px;font-size:12px}
 
-    .section-header {
-      text-align: center;
-      margin-bottom: 64px;
-    }
-    .section-tag {
-      display: inline-block;
-      padding: 4px 14px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: rgba(124,58,237,0.08);
-      font-size: 12px;
-      color: #a78bfa;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 16px;
-    }
-    h2 {
-      font-size: 48px;
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 16px;
-    }
-    .section-sub {
-      font-size: 16px;
-      color: var(--text2);
-      max-width: 500px;
-      margin: 0 auto;
-    }
+      .hero{min-height:auto;padding:64px 16px 40px}
+      h1{font-size:44px;letter-spacing:-1.5px}
+      .hero-sub{font-size:15px;line-height:1.6;margin-bottom:28px}
+      .hero-ctас{margin-bottom:28px}
+      .btn-download,.btn-demo{padding:12px 18px;font-size:14px}
 
-    /* ── FEATURES GRID ── */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    .feat-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      transition: border-color 0.2s, transform 0.2s;
-    }
-    .feat-card:hover { border-color: rgba(124,58,237,0.5); transform: translateY(-3px); }
-    .feat-icon {
-      width: 44px; height: 44px;
-      border-radius: 10px;
-      background: rgba(124,58,237,0.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      margin-bottom: 16px;
-    }
-    .feat-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
-    .feat-desc  { font-size: 14px; color: var(--text2); line-height: 1.6; }
-
-    /* ── STEPS ── */
-    .steps-container {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    .step {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .step.active, .step:hover { border-color: var(--accent); background: rgba(124,58,237,0.08); }
-    .step-num   { font-size: 12px; color: #a78bfa; font-weight: 600; margin-bottom: 12px; letter-spacing: 1px; }
-    .step-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-    .step-desc  { font-size: 13px; color: var(--text2); }
-
-    /* ── PREVIEW / MESH ── */
-    .preview-inner {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 48px;
-      max-width: 1100px;
-      margin: 0 auto;
-      align-items: center;
-    }
-    .preview-text h2 { text-align: left; font-size: 42px; margin-bottom: 16px; }
-    .preview-text p  { color: var(--text2); font-size: 15px; margin-bottom: 24px; }
-    .preview-canvas-wrap {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-    }
-    #meshCanvas { display: block; width: 100%; height: auto; }
-
-    /* ── APP MOCKUP ── */
-    .app-mockup { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
-    .app-topbar { background: rgba(124,58,237,0.1); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; gap: 8px; }
-    .dot   { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-r { background: #ff5f57; }
-    .dot-y { background: #ffbd2e; }
-    .dot-g { background: #28c840; }
-    .app-body { display: flex; height: 220px; }
-    .sidebar {
-      width: 140px;
-      border-right: 0.5px solid var(--border);
-      padding: 16px;
-    }
-    .sidebar-item { font-size: 12px; color: var(--text2); padding: 8px 10px; border-radius: 6px; margin-bottom: 4px; cursor: pointer; }
-    .sidebar-item.active { background: rgba(124,58,237,0.15); color: #a78bfa; }
-    .app-main { flex: 1; padding: 16px; }
-    .tx-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid var(--border); font-size: 12px; }
-    .tx-amount { color: #4ade80; font-weight: 600; }
-
-    /* ── NET VIZ ── */
-    .netviz-inner {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 48px;
-      max-width: 1100px;
-      margin: 0 auto;
-      align-items: center;
-    }
-    .netviz-canvas-wrap {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      aspect-ratio: 1;
-    }
-    #netViz { display: block; width: 100%; height: 100%; }
-
-    /* ── CTA ── */
-    .cta-glow {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%,-50%);
-      width: 600px; height: 300px;
-      background: radial-gradient(ellipse, rgba(124,58,237,0.2) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .cta-section h2 { font-size: 52px; margin-bottom: 16px; position: relative; }
-    .cta-section p  { color: var(--text2); font-size: 17px; margin-bottom: 40px; position: relative; }
-    .cta-btns { display: flex; gap: 16px; justify-content: center; position: relative; }
-
-    /* ── FOOTER ── */
-    footer {
-      padding: 40px 48px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .footer-logo {
-      font-size: 18px; font-weight: 700;
-      background: linear-gradient(135deg, #a78bfa, #f472b6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .footer-links { display: flex; gap: 24px; list-style: none; }
-    .footer-links a { color: var(--text2); text-decoration: none; font-size: 13px; transition: color 0.2s; }
-    .footer-links a:hover { color: var(--text); }
-    .footer-copy { font-size: 13px; color: var(--text2); }
-
-    /* ── MOBILE RESPONSIVE ── */
-    @media (max-width: 768px) {
-      h1 { font-size: 48px; }
-      h2 { font-size: 36px; }
-
-      nav { padding: 18px 24px; }
-      .nav-links { display: none; }
-
-      .hero { padding: 100px 24px 60px; }
-      .hero-btns { flex-direction: column; align-items: center; }
-
-      .hero-stats {
-        flex-direction: column;
-        gap: 0;
-        border: none;
-        background: transparent;
+      .hero-stats{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        border:0.5px solid var(--border);
       }
-      .hstat + .hstat {
-        border-left: none;
-        border-top: 1px solid var(--border);
-      }
+      .hstat{padding:16px 10px}
+      .hstat+.hstat{border-left:0.5px solid var(--border)}
+      .hstat:nth-child(3), .hstat:nth-child(4){border-top:0.5px solid var(--border)}
 
-      .features-grid { grid-template-columns: 1fr; }
-      .feat-card[style*="grid-column:span 2"] { grid-column: span 1 !important; }
+      .section,.how-section,.preview-section,.cta-section{padding:64px 16px}
+      .section-title{font-size:30px;letter-spacing:-1px}
+      .section-sub{font-size:14px}
 
-      .steps-container { grid-template-columns: 1fr; }
+      .features-grid{grid-template-columns:1fr;gap:12px;margin-top:36px}
+      .feat-card{padding:24px 18px;border-radius:16px}
+      .feat-card[style*="grid-column:span 2"]{grid-column:span 1 !important}
+      .feat-card[style*="grid-column:span 2"] > div{grid-template-columns:1fr !important;gap:16px !important}
 
-      .preview-inner { grid-template-columns: 1fr; }
-      .preview-text h2 { font-size: 36px; }
+      .steps-container{grid-template-columns:1fr;gap:28px;margin-top:36px}
+      .step{padding:20px 0}
+      .network-viz{height:280px;border-radius:18px}
 
-      .netviz-inner { grid-template-columns: 1fr; }
+      .preview-frame{margin-top:36px}
+      .preview-inner{grid-template-columns:1fr;min-height:auto}
+      .sidebar{border-right:none;border-bottom:0.5px solid var(--border);padding:18px 16px}
+      .main-content{padding:18px 14px}
+      .now-playing-bar{padding:14px;gap:10px}
+      .np-art{width:44px;height:44px}
+      .np-title{font-size:14px}
+      .np-artist{font-size:11px}
 
-      .sidebar {
-        border-right: none;
-        border-bottom: 0.5px solid var(--border);
-        width: 100%;
-      }
-      .app-body { flex-direction: column; height: auto; }
+      .track-item{padding:8px 6px}
+      .tr-art{width:34px;height:34px}
+      .tr-name{font-size:12px}
+      .tr-artist,.tr-peers,.tr-dur{font-size:11px}
 
-      .section,
-      .how-section,
-      .preview-section,
-      .netviz-section,
-      .cta-section { padding: 60px 24px; }
+      .cta-title{font-size:34px;letter-spacing:-1px}
+      .cta-sub{font-size:14px;margin-bottom:24px}
+      .os-btn{width:100%;justify-content:flex-start}
 
-      .cta-section h2 { font-size: 36px; }
-      .cta-btns { flex-direction: column; align-items: center; }
-
-      footer {
-        flex-direction: column;
-        gap: 20px;
-        text-align: center;
-        padding: 32px 24px;
-      }
-      .footer-links { flex-wrap: wrap; justify-content: center; }
+      footer{padding:24px 16px;flex-direction:column;gap:14px;align-items:flex-start}
+      .foot-links{flex-wrap:wrap;gap:14px}
     }
 
-    @media (max-width: 480px) {
-      h1 { font-size: 36px; }
-      h2 { font-size: 28px; }
-      .hero-desc { font-size: 16px; }
-      .btn-primary, .btn-secondary { width: 100%; }
-      .hstat { padding: 16px 24px; }
+    @media (max-width: 420px){
+      h1{font-size:38px}
+      .section-title{font-size:26px}
+      .cta-title{font-size:30px}
+      .hero-stats{grid-template-columns:1fr}
+      .hstat+.hstat{border-left:none}
+      .hstat:nth-child(2), .hstat:nth-child(3), .hstat:nth-child(4){border-top:0.5px solid var(--border)}
     }
   </style>
 </head>
 <body>
+  <div id="site">
 
-<!-- ── NAVIGATION ── -->
-<nav>
-  <div class="nav-logo">Ripple</div>
-  <ul class="nav-links">
-    <li><a href="#features">Features</a></li>
-    <li><a href="#how">How it works</a></li>
-    <li><a href="#network-preview">Discover</a></li>
-    <li><a href="#netviz">Network</a></li>
-  </ul>
-  <button class="nav-cta">Start Listening</button>
-</nav>
-
-<!-- ── HERO ── -->
-<section class="hero">
-  <canvas id="network"></canvas>
-  <div class="hero-content">
-    <div class="hero-badge">✦ Peer-to-Peer Music Streaming</div>
-    <h1>Stream Music. No Servers.</h1>
-    <p class="hero-desc">Ripple lets you stream and share music directly between listeners — no central servers, no middlemen, just pure sound.</p>
-    <div class="hero-btns">
-      <button class="btn-primary">Start Listening</button>
-      <button class="btn-secondary">Explore Tracks →</button>
-    </div>
-    <div class="hero-stats">
-      <div class="hstat">
-        <div class="hstat-val">2M+</div>
-        <div class="hstat-label">Tracks</div>
-      </div>
-      <div class="hstat">
-        <div class="hstat-val">50K+</div>
-        <div class="hstat-label">Artists</div>
-      </div>
-      <div class="hstat">
-        <div class="hstat-val">0ms</div>
-        <div class="hstat-label">Server Latency</div>
-      </div>
-      <div class="hstat">
-        <div class="hstat-val">100%</div>
-        <div class="hstat-label">P2P</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── FEATURES ── -->
-<section class="section" id="features">
-  <div class="section-header">
-    <div class="section-tag">Features</div>
-    <h2>Built for Music Lovers</h2>
-    <p class="section-sub">True peer-to-peer audio streaming with the quality audiophiles demand.</p>
-  </div>
-  <div class="features-grid">
-    <div class="feat-card" style="grid-column:span 2">
-      <div class="feat-icon">🎵</div>
-      <div class="feat-title">Lossless P2P Audio</div>
-      <div class="feat-desc">Stream FLAC and high-bitrate audio directly between peers. No compression artifacts, no re-encoding — your music sounds exactly as the artist intended.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🔒</div>
-      <div class="feat-title">Private Listening</div>
-      <div class="feat-desc">End-to-end encrypted streams. No one monitors your playlist or listening habits.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🌍</div>
-      <div class="feat-title">Global Discovery</div>
-      <div class="feat-desc">Connect with artists and listeners from 150+ countries. Discover underground scenes before they go mainstream.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">📡</div>
-      <div class="feat-title">Offline-First Sync</div>
-      <div class="feat-desc">Cache tracks locally and keep listening even when your connection drops. Syncs automatically when you're back online.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">📊</div>
-      <div class="feat-title">Live Waveform Stats</div>
-      <div class="feat-desc">See real-time waveforms, peer connection quality, and listener counts — all visualized beautifully in your dashboard.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ── HOW IT WORKS ── -->
-<section class="how-section" id="how">
-  <div class="section-header">
-    <div class="section-tag">How It Works</div>
-    <h2>Four Steps to Your Music</h2>
-    <p class="section-sub">Start streaming P2P audio in minutes — no server setup required.</p>
-  </div>
-  <div class="steps-container">
-    <div class="step active">
-      <div class="step-num">STEP 01</div>
-      <div class="step-title">Create Profile</div>
-      <div class="step-desc">Sign up in under 2 minutes. Set your artist name or listener alias — no email verification required.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">STEP 02</div>
-      <div class="step-title">Upload or Browse</div>
-      <div class="step-desc">Upload your tracks or browse thousands of artists. Your files are shared directly from your device.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">STEP 03</div>
-      <div class="step-title">Connect Peers</div>
-      <div class="step-desc">Ripple finds nearby and global peers automatically. The more listeners, the stronger the network.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">STEP 04</div>
-      <div class="step-title">Play &amp; Share</div>
-      <div class="step-desc">Hit play and stream instantly. Share a link and anyone can join your listening session in real time.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ── PREVIEW / MESH CANVAS ── -->
-<section class="preview-section" id="network-preview">
-  <div class="preview-inner">
-    <div class="preview-text">
-      <div class="section-tag">Discover</div>
-      <h2>Your Personal Music Feed</h2>
-      <p>Ripple surfaces tracks from artists you love and peers nearby. The more you listen, the smarter your feed gets — all without a recommendation server.</p>
-      <div class="app-mockup">
-        <div class="app-topbar">
-          <div class="dot dot-r"></div>
-          <div class="dot dot-y"></div>
-          <div class="dot dot-g"></div>
+    <!-- NAV -->
+    <nav>
+      <div class="logo-mark">
+        <div class="logo-icon">
+          <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="2" fill="white" opacity="0.9"/><circle cx="2" cy="10" r="1.5" fill="white" opacity="0.6"/><circle cx="12" cy="10" r="1.5" fill="white" opacity="0.6"/><line x1="7" y1="4" x2="2" y2="10" stroke="white" stroke-width="0.8" opacity="0.5"/><line x1="7" y1="4" x2="12" y2="10" stroke="white" stroke-width="0.8" opacity="0.5"/><line x1="2" y1="10" x2="12" y2="10" stroke="white" stroke-width="0.8" opacity="0.5"/></svg>
         </div>
-        <div class="app-body">
+        <span class="logo-text">Ripple</span>
+      </div>
+      <div class="nav-links">
+        <a>Features</a>
+        <a>How it works</a>
+        <a>Developers</a>
+        <a>Community</a>
+      </div>
+      <div class="nav-actions">
+        <a href="https://github.com/KKittyCatik/music_p2p" class="btn-primary-sm">
+        Download
+        </a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <canvas id="network"></canvas>
+      <div class="hero-inner">
+        <div class="hero-pill"><span class="pill-dot"></span> Open protocol · No central servers</div>
+        <h1>Stream Music.<br><span class="grad-text">No Servers.</span></h1>
+        <p class="hero-sub">Decentralized audio streaming powered by peer-to-peer technology. Your music, your data, your network.</p>
+        <div class="hero-ctас">
+            <a href="https://github.com/KKittyCatik/music_p2p" class="btn-download">
+                &#x2B07; Download App
+            </a>
+        </div>
+        <div class="hero-stats">
+          <div class="hstat"><div class="hstat-num">0 ms</div><div class="hstat-label">Server latency</div></div>
+          <div class="hstat"><div class="hstat-num">100%</div><div class="hstat-label">Open source</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section">
+      <div style="max-width:680px">
+        <div class="section-eyebrow">Why Ripple</div>
+        <div class="section-title">Built different.<br>By design.</div>
+        <p class="section-sub">We didn't just remove the servers. We rethought what a music service can be — for users, artists, and developers.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feat-card">
+          <div class="feat-icon">&#x2B21;</div>
+          <div class="feat-title">No Servers</div>
+          <div class="feat-desc">Fully peer-to-peer architecture. No infrastructure to attack, no company to shut down, no single point of failure.</div>
+          <div class="feat-tag">Decentralized</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">&#x25CE;</div>
+          <div class="feat-title">Privacy First</div>
+          <div class="feat-desc">Zero tracking. No listening history sold to advertisers. Your data stays on your device and your peers only.</div>
+          <div class="feat-tag">Zero-knowledge</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">&#x25C8;</div>
+          <div class="feat-title">Instant Streaming</div>
+          <div class="feat-desc">Stream from the closest peer in your network. Low latency, high quality, no buffering waits.</div>
+          <div class="feat-tag">Sub-100ms</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">&#x2325;</div>
+          <div class="feat-title">Open Protocol</div>
+          <div class="feat-desc">Build your own client, fork the network, integrate into anything. Full API and protocol documentation available.</div>
+          <div class="feat-tag">Developer-first</div>
+        </div>
+        <div class="feat-card" style="grid-column:span 2">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center">
+            <div>
+              <div class="feat-icon">&#x2295;</div>
+              <div class="feat-title">Offline Mesh</div>
+              <div class="feat-desc">Music works even without internet. Local peers share tracks over Wi-Fi or Bluetooth — perfect for festivals, flights, remote areas.</div>
+              <div class="feat-tag">Mesh networking</div>
+            </div>
+            <canvas id="meshCanvas" width="240" height="120" style="width:100%;border-radius:12px;opacity:0.8"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-section">
+      <div class="section-eyebrow">The Protocol</div>
+      <div class="section-title">How Ripple works</div>
+      <div class="steps-container">
+        <div class="steps-list">
+          <div class="step active" data-step="0">
+            <div class="step-num">01</div>
+            <div class="step-content">
+              <div class="step-title">You open a track</div>
+              <div class="step-desc">Your Ripple client searches the distributed hash table for peers who have the audio data you need.</div>
+            </div>
+          </div>
+          <div class="step" data-step="1">
+            <div class="step-num">02</div>
+            <div class="step-content">
+              <div class="step-title">Peers are discovered</div>
+              <div class="step-desc">The closest, fastest peers respond in milliseconds. No central broker. No middleman. Just direct connections.</div>
+            </div>
+          </div>
+          <div class="step" data-step="2">
+            <div class="step-num">03</div>
+            <div class="step-content">
+              <div class="step-title">Data streams directly</div>
+              <div class="step-desc">Audio chunks flow directly from peer to you — encrypted, verified, and at full fidelity. You're also seeding for others.</div>
+            </div>
+          </div>
+        </div>
+        <div class="network-viz"><canvas id="netViz"></canvas></div>
+      </div>
+    </section>
+
+    <!-- UI PREVIEW -->
+    <section class="preview-section">
+      <div class="section-eyebrow">App Preview</div>
+      <div class="section-title">Feels like Spotify.<br>Works like nothing else.</div>
+      <div class="preview-frame">
+        <div class="preview-top">
+          <div class="traffic-dot td-r"></div>
+          <div class="traffic-dot td-y"></div>
+          <div class="traffic-dot td-g"></div>
+          <span style="margin-left:8px;font-size:12px;color:var(--muted)">Ripple — v1.0 beta</span>
+        </div>
+        <div class="preview-inner">
           <div class="sidebar">
-            <div class="sidebar-item active">Now Playing</div>
-            <div class="sidebar-item">My Library</div>
-            <div class="sidebar-item">Discover</div>
-            <div class="sidebar-item">Artists</div>
+            <div class="sb-logo"><div class="sb-logo-dot"></div>Ripple</div>
+            <div class="sb-section">Menu</div>
+            <div class="sb-item active"><span class="sb-icon">&#9835;</span> Discover</div>
+            <div class="sb-item"><span class="sb-icon">&#x2295;</span> My Network</div>
+            <div class="sb-item"><span class="sb-icon">&#x25CE;</span> Library</div>
+            <div class="sb-item"><span class="sb-icon">&#x2315;</span> Search</div>
+            <div class="sb-section">Peers</div>
+            <div class="sb-item"><span class="sb-icon" style="width:8px;height:8px;border-radius:50%;background:#a78bfa;display:inline-block;margin-right:8px"></span>247 online</div>
+            <div class="sb-item"><span class="sb-icon" style="width:8px;height:8px;border-radius:50%;background:#34d399;display:inline-block;margin-right:8px"></span>12 local peers</div>
           </div>
-          <div class="app-main">
-            <div class="tx-row"><span>Lunar Echo — Drift</span><span class="tx-amount">▶ 3:42</span></div>
-            <div class="tx-row"><span>Noa Sato — Cascade</span><span class="tx-amount">▶ 4:15</span></div>
-            <div class="tx-row"><span>Velvet Node — Haze</span><span class="tx-amount">▶ 2:58</span></div>
-            <div class="tx-row"><span>Aura Shift — Signal</span><span class="tx-amount">▶ 5:03</span></div>
+          <div class="main-content">
+            <div class="now-playing-bar">
+              <div class="np-art">&#9835;</div>
+              <div class="np-info">
+                <div class="np-title">Gravity Pull</div>
+                <div class="np-artist">Lunar Echo · Ambient</div>
+                <div class="np-peers"><span class="peer-badge-sm"></span> 1,847 peers sharing this track</div>
+              </div>
+              <div class="np-ctrl">
+                <button class="np-btn">&#x27E8;&#x27E8;</button>
+                <button class="np-play">&#x25B6;</button>
+                <button class="np-btn">&#x27E9;&#x27E9;</button>
+              </div>
+            </div>
+            <div class="tracks-label">Trending in your network</div>
+            <div class="track-item active-track">
+              <div class="tr-num" style="color:#a78bfa">&#x25B6;</div>
+              <div class="tr-art art-g1"></div>
+              <div class="tr-info"><div class="tr-name">Gravity Pull</div><div class="tr-artist">Lunar Echo</div></div>
+              <div class="tr-peers"><span class="peer-badge-sm"></span> 1.8k</div>
+              <div class="tr-dur">4:22</div>
+            </div>
+            <div class="track-item">
+              <div class="tr-num">2</div>
+              <div class="tr-art art-g2"></div>
+              <div class="tr-info"><div class="tr-name">Parallel Lines</div><div class="tr-artist">Noa Sato</div></div>
+              <div class="tr-peers"><span class="peer-badge-sm"></span> 1.2k</div>
+              <div class="tr-dur">3:55</div>
+            </div>
+            <div class="track-item">
+              <div class="tr-num">3</div>
+              <div class="tr-art art-g3"></div>
+              <div class="tr-info"><div class="tr-name">Dark Signal</div><div class="tr-artist">Mira Volt</div></div>
+              <div class="tr-peers"><span class="peer-badge-sm"></span> 940</div>
+              <div class="tr-dur">5:01</div>
+            </div>
+            <div class="track-item">
+              <div class="tr-num">4</div>
+              <div class="tr-art art-g4"></div>
+              <div class="tr-info"><div class="tr-name">Ocean Protocol</div><div class="tr-artist">Ariel K.</div></div>
+              <div class="tr-peers"><span class="peer-badge-sm"></span> 720</div>
+              <div class="tr-dur">6:14</div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="preview-canvas-wrap">
-      <canvas id="meshCanvas" width="480" height="240"></canvas>
-    </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="cta-glow"></div>
+      <div class="cta-inner">
+        <div class="section-eyebrow" style="margin-bottom:20px">Join the movement</div>
+        <div class="cta-title">Music without<br><span class="grad-text">permission.</span></div>
+        <p class="cta-sub">Join 2.4 million peers who believe music should be free, private, and direct.</p>
+        <div class="cta-btns">
+          <div class="os-btn">
+            <div class="os-icon">&#x2318;</div>
+            <div><div class="os-text-label">Download for</div><div class="os-text-name">macOS</div></div>
+          </div>
+          <div class="os-btn">
+            <div class="os-icon">&#x229E;</div>
+            <div><div class="os-text-label">Download for</div><div class="os-text-name">Windows</div></div>
+          </div>
+          <div class="os-btn">
+            <div class="os-icon">&#x1F427;</div>
+            <div><div class="os-text-label">Download for</div><div class="os-text-name">Linux</div></div>
+          </div>
+          <div class="os-btn">
+            <div class="os-icon">&#x232C;</div>
+            <div><div class="os-text-label">View on</div><div class="os-text-name">GitHub</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="foot-logo">
+        <div class="sb-logo-dot" style="width:18px;height:18px;border-radius:5px;background:linear-gradient(135deg,#7C3AED,#EC4899)"></div>
+        Ripple
+      </div>
+      <div class="foot-links">
+        <a>GitHub</a>
+        <a>Docs</a>
+        <a>Protocol</a>
+        <a>Privacy</a>
+        <a>Community</a>
+      </div>
+      <div class="foot-copy">© 2026 Ripple. Open source.</div>
+    </footer>
+
   </div>
-</section>
 
-<!-- ── NET VIZ ── -->
-<section class="netviz-section" id="netviz">
-  <div class="netviz-inner">
-    <div class="netviz-canvas-wrap">
-      <canvas id="netViz"></canvas>
-    </div>
-    <div>
-      <div class="section-tag">Network</div>
-      <h2>Watch Your Peer Network Grow</h2>
-      <p style="color:var(--text2);font-size:15px;margin-bottom:24px;">Every listener who joins strengthens the mesh. As the community grows, streaming quality and availability scale automatically — no servers needed.</p>
-      <button class="btn-primary">Explore Network →</button>
-    </div>
-  </div>
-</section>
+  <script>
+    // HERO NETWORK CANVAS
+    const cnv = document.getElementById('network');
+    const ctx = cnv.getContext('2d');
 
-<!-- ── CTA ── -->
-<section class="cta-section">
-  <div class="cta-glow"></div>
-  <h2>Ready to Hear Music the Way It Was Meant to Sound?</h2>
-  <p>Join 50,000+ listeners already streaming on Ripple — no servers, no subscriptions, just music.</p>
-  <div class="cta-btns">
-    <button class="btn-primary">Start Listening Free</button>
-    <button class="btn-secondary">Meet the Artists</button>
-  </div>
-</section>
+    let isPageVisible = true;
+    document.addEventListener('visibilitychange', () => {
+      isPageVisible = document.visibilityState === 'visible';
+    });
 
-<!-- ── FOOTER ── -->
-<footer>
-  <div class="footer-logo">Ripple</div>
-  <ul class="footer-links">
-    <li><a href="#">Discover</a></li>
-    <li><a href="#">Artists</a></li>
-    <li><a href="#">Blog</a></li>
-    <li><a href="#">Open Source</a></li>
-    <li><a href="#">Privacy</a></li>
-    <li><a href="#">Terms</a></li>
-  </ul>
-  <div class="footer-copy">© 2024 Ripple. All rights reserved.</div>
-</footer>
+    function resizeCnv(){
+      cnv.width = window.innerWidth * devicePixelRatio;
+      cnv.height = window.innerHeight * devicePixelRatio;
 
-<script>
-// ─── Utility: pause/resume animation based on viewport visibility ───────────
-function createVisibilityObserver(element, callback) {
-  const observer = new IntersectionObserver(
-    (entries) => entries.forEach(entry => callback(entry.isIntersecting)),
-    { threshold: 0.1 }
-  );
-  observer.observe(element);
-  return observer;
-}
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+    }
+    resizeCnv();
+    window.addEventListener('resize', () => {
+      resizeCnv();
+    });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// 1. HERO NETWORK CANVAS
-// ═══════════════════════════════════════════════════════════════════════════
-const cnv = document.getElementById('network');
-const ctx = cnv.getContext('2d');
-let isNetworkVisible  = true;
-let networkAnimFrame;
-let networkRunning    = false;
+    const nodes = [];
+    const isSmallScreen = window.matchMedia('(max-width: 768px)').matches;
+    const heroNodeCount = isSmallScreen ? 38 : 55;
 
-function resizeCnv() {
-  cnv.width  = cnv.offsetWidth;
-  cnv.height = cnv.offsetHeight;
-}
-window.addEventListener('resize', resizeCnv);
-resizeCnv();
+    for(let i = 0; i < heroNodeCount; i++){
+      nodes.push({
+        x: Math.random() * cnv.width,
+        y: Math.random() * cnv.height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 2.5 + 1,
+        pulse: Math.random() * Math.PI * 2
+      });
+    }
 
-// Reduce particle count on mobile to avoid GPU overload
-const isMobile   = window.innerWidth < 768;
-const nodeCount  = isMobile ? 30 : 55;
+    function drawNetwork(){
+      if(!isPageVisible){ requestAnimationFrame(drawNetwork); return; }
+      if(!cnv.width){ requestAnimationFrame(drawNetwork); return; }
 
-const nodes = [];
-for (let i = 0; i < nodeCount; i++) {
-  nodes.push({
-    x:     Math.random() * cnv.width,
-    y:     Math.random() * cnv.height,
-    vx:    (Math.random() - 0.5) * 0.4,
-    vy:    (Math.random() - 0.5) * 0.4,
-    r:     Math.random() * 2.5 + 1,
-    pulse: Math.random() * Math.PI * 2
-  });
-}
+      ctx.clearRect(0, 0, cnv.width, cnv.height);
 
-function drawNetwork() {
-  if (!isNetworkVisible || !cnv.width) return;
+      nodes.forEach(n => {
+        n.x += n.vx;
+        n.y += n.vy;
+        n.pulse += 0.02;
+        if(n.x < 0 || n.x > cnv.width) n.vx *= -1;
+        if(n.y < 0 || n.y > cnv.height) n.vy *= -1;
+      });
 
-  ctx.clearRect(0, 0, cnv.width, cnv.height);
+      for(let i = 0; i < nodes.length; i++){
+        for(let j = i + 1; j < nodes.length; j++){
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
 
-  nodes.forEach(n => {
-    n.x += n.vx; n.y += n.vy; n.pulse += 0.02;
-    if (n.x < 0 || n.x > cnv.width)  n.vx *= -1;
-    if (n.y < 0 || n.y > cnv.height) n.vy *= -1;
-  });
+          if(dist < 140){
+            const alpha = (1 - dist / 140) * 0.18;
+            const grad = ctx.createLinearGradient(nodes[i].x, nodes[i].y, nodes[j].x, nodes[j].y);
+            grad.addColorStop(0, `rgba(124,58,237,${alpha})`);
+            grad.addColorStop(1, `rgba(244,114,182,${alpha})`);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 0.6;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.stroke();
+          }
+        }
+      }
 
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const dx   = nodes[i].x - nodes[j].x;
-      const dy   = nodes[i].y - nodes[j].y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 140) {
-        const alpha = (1 - dist / 140) * 0.18;
-        const grad  = ctx.createLinearGradient(nodes[i].x, nodes[i].y, nodes[j].x, nodes[j].y);
-        grad.addColorStop(0, `rgba(124,58,237,${alpha})`);
-        grad.addColorStop(1, `rgba(244,114,182,${alpha})`);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth   = 0.6;
+      nodes.forEach(n => {
+        const glow = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 4);
+        const pulse = 0.5 + Math.sin(n.pulse) * 0.3;
+        glow.addColorStop(0, `rgba(167,139,250,${pulse * 0.6})`);
+        glow.addColorStop(1, 'transparent');
+        ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.moveTo(nodes[i].x, nodes[i].y);
-        ctx.lineTo(nodes[j].x, nodes[j].y);
-        ctx.stroke();
-      }
+        ctx.arc(n.x, n.y, n.r * 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = `rgba(200,180,255,${0.6 + Math.sin(n.pulse) * 0.4})`;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      requestAnimationFrame(drawNetwork);
     }
-  }
+    drawNetwork();
 
-  nodes.forEach(n => {
-    const pulse = 0.5 + Math.sin(n.pulse) * 0.3;
-    const glow  = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 4);
-    glow.addColorStop(0, `rgba(167,139,250,${pulse * 0.6})`);
-    glow.addColorStop(1, 'transparent');
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(n.x, n.y, n.r * 4, 0, Math.PI * 2);
-    ctx.fill();
+    // MESH CANVAS
+    const mc = document.getElementById('meshCanvas');
+    const mctx = mc.getContext('2d');
+    mc.width = 480;
+    mc.height = 240;
 
-    ctx.fillStyle = `rgba(200,180,255,${0.6 + Math.sin(n.pulse) * 0.4})`;
-    ctx.beginPath();
-    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-    ctx.fill();
-  });
+    const mnodes = [
+      {x:60,y:120,r:5},{x:160,y:60,r:4},{x:160,y:180,r:4},{x:280,y:100,r:5},
+      {x:280,y:160,r:4},{x:400,y:120,r:5},{x:100,y:40,r:3},{x:380,y:60,r:3}
+    ];
+    let mphase = 0;
 
-  networkAnimFrame = requestAnimationFrame(drawNetwork);
-  networkRunning   = true;
-}
+    function drawMesh(){
+      if(!isPageVisible){ requestAnimationFrame(drawMesh); return; }
 
-createVisibilityObserver(cnv, (visible) => {
-  isNetworkVisible = visible;
-  if (visible && !networkRunning) drawNetwork();
-  else if (!visible) { cancelAnimationFrame(networkAnimFrame); networkRunning = false; }
-});
+      mctx.clearRect(0, 0, 480, 240);
+      mphase += 0.02;
 
-// ═══════════════════════════════════════════════════════════════════════════
-// 2. MESH CANVAS
-// ═══════════════════════════════════════════════════════════════════════════
-const mc   = document.getElementById('meshCanvas');
-const mctx = mc.getContext('2d');
-mc.width   = 480;
-mc.height  = 240;
+      for(let i = 0; i < mnodes.length; i++){
+        for(let j = i + 1; j < mnodes.length; j++){
+          const dx = mnodes[i].x - mnodes[j].x;
+          const dy = mnodes[i].y - mnodes[j].y;
+          const d = Math.sqrt(dx * dx + dy * dy);
 
-const mnodes = [
-  { x:  60, y: 120, r: 5 },
-  { x: 160, y:  60, r: 4 },
-  { x: 160, y: 180, r: 4 },
-  { x: 280, y: 100, r: 5 },
-  { x: 280, y: 160, r: 4 },
-  { x: 400, y: 120, r: 5 },
-  { x: 100, y:  40, r: 3 },
-  { x: 380, y:  60, r: 3 }
-];
+          if(d < 200){
+            const a = (1 - d / 200) * 0.5;
+            mctx.strokeStyle = `rgba(167,139,250,${a})`;
+            mctx.lineWidth = 0.8;
+            mctx.setLineDash([]);
+            mctx.beginPath();
+            mctx.moveTo(mnodes[i].x, mnodes[i].y);
+            mctx.lineTo(mnodes[j].x, mnodes[j].y);
+            mctx.stroke();
 
-const medges = [
-  [0,1],[0,2],[1,3],[2,3],[3,4],[3,5],[4,5],[1,6],[5,7],[0,6],[2,4]
-];
+            if(d < 150){
+              const t = (Math.sin(mphase + i * 0.8) * .5 + .5);
+              const px = mnodes[i].x + (mnodes[j].x - mnodes[i].x) * t;
+              const py = mnodes[i].y + (mnodes[j].y - mnodes[i].y) * t;
+              mctx.fillStyle = 'rgba(244,114,182,0.8)';
+              mctx.beginPath();
+              mctx.arc(px, py, 2.5, 0, Math.PI * 2);
+              mctx.fill();
+            }
+          }
+        }
+      }
 
-let mphase         = 0;
-let isMeshVisible  = false;
-let meshAnimFrame;
-let meshRunning    = false;
+      mnodes.forEach((n, i) => {
+        const p = 0.6 + Math.sin(mphase + i) * 0.4;
+        mctx.fillStyle = `rgba(124,58,237,${p})`;
+        mctx.beginPath();
+        mctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        mctx.fill();
 
-function drawMesh() {
-  if (!isMeshVisible) return;
-  mctx.clearRect(0, 0, 480, 240);
-  mphase += 0.02;
+        mctx.fillStyle = `rgba(200,180,255,0.9)`;
+        mctx.beginPath();
+        mctx.arc(n.x, n.y, n.r * 0.5, 0, Math.PI * 2);
+        mctx.fill();
+      });
 
-  // Draw edges with pulsing gradient
-  medges.forEach(([a, b]) => {
-    const pulse = 0.3 + Math.sin(mphase + a * 0.7) * 0.2;
-    const grad  = mctx.createLinearGradient(mnodes[a].x, mnodes[a].y, mnodes[b].x, mnodes[b].y);
-    grad.addColorStop(0, `rgba(124,58,237,${pulse})`);
-    grad.addColorStop(1, `rgba(244,114,182,${pulse})`);
-    mctx.strokeStyle = grad;
-    mctx.lineWidth   = 1.2;
-    mctx.beginPath();
-    mctx.moveTo(mnodes[a].x, mnodes[a].y);
-    mctx.lineTo(mnodes[b].x, mnodes[b].y);
-    mctx.stroke();
-  });
+      requestAnimationFrame(drawMesh);
+    }
+    drawMesh();
 
-  // Animated packet travelling along edges
-  const edgeIdx = Math.floor(mphase * 0.5) % medges.length;
-  const tEdge   = medges[edgeIdx];
-  const t       = (mphase * 0.5) % 1;
-  const na = mnodes[tEdge[0]], nb = mnodes[tEdge[1]];
-  mctx.beginPath();
-  mctx.arc(na.x + (nb.x - na.x) * t, na.y + (nb.y - na.y) * t, 4, 0, Math.PI * 2);
-  mctx.fillStyle = 'rgba(244,114,182,0.9)';
-  mctx.fill();
+    // NET VIZ
+    const nv = document.getElementById('netViz');
+    const nvctx = nv.getContext('2d');
 
-  // Draw nodes with glow
-  mnodes.forEach((n, i) => {
-    const p    = 0.5 + Math.sin(mphase + i * 0.8) * 0.3;
-    const glow = mctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 3);
-    glow.addColorStop(0, `rgba(167,139,250,${p * 0.7})`);
-    glow.addColorStop(1, 'transparent');
-    mctx.fillStyle = glow;
-    mctx.beginPath();
-    mctx.arc(n.x, n.y, n.r * 3, 0, Math.PI * 2);
-    mctx.fill();
+    function resizeNv(){
+      nv.width = nv.offsetWidth || 360;
+      nv.height = nv.offsetHeight || 360;
+    }
+    resizeNv();
+    window.addEventListener('resize', resizeNv, { passive: true });
 
-    mctx.fillStyle = `rgba(200,180,255,${0.7 + Math.sin(mphase + i) * 0.3})`;
-    mctx.beginPath();
-    mctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-    mctx.fill();
-  });
+    const nvnodes = [
+      {x:nv.width/2,y:nv.height/2,r:8,main:true,label:'You'},
+      {x:nv.width*0.2,y:nv.height*0.3,r:5,label:'Peer A',phase:0},
+      {x:nv.width*0.8,y:nv.height*0.25,r:5,label:'Peer B',phase:1},
+      {x:nv.width*0.15,y:nv.height*0.7,r:4,label:'Peer C',phase:2},
+      {x:nv.width*0.85,y:nv.height*0.65,r:4,label:'Peer D',phase:0.5},
+      {x:nv.width*0.5,y:nv.height*0.15,r:4,label:'Peer E',phase:1.5},
+      {x:nv.width*0.5,y:nv.height*0.85,r:3,label:'Peer F',phase:2.5},
+    ];
+    let nvphase = 0;
 
-  meshAnimFrame = requestAnimationFrame(drawMesh);
-  meshRunning   = true;
-}
+    function drawNetViz(){
+      if(!isPageVisible){ requestAnimationFrame(drawNetViz); return; }
 
-createVisibilityObserver(mc, (visible) => {
-  isMeshVisible = visible;
-  if (visible && !meshRunning) drawMesh();
-  else if (!visible) { cancelAnimationFrame(meshAnimFrame); meshRunning = false; }
-});
+      nvctx.clearRect(0, 0, nv.width, nv.height);
+      nvphase += 0.025;
 
-// ═══════════════════════════════════════════════════════════════════════════
-// 3. NET VIZ CANVAS
-// ═══════════════════════════════════════════════════════════════════════════
-const nv    = document.getElementById('netViz');
-const nvctx = nv.getContext('2d');
+      const cx = nv.width / 2;
+      const cy = nv.height / 2;
 
-function resizeNetViz() {
-  const wrap = nv.parentElement;
-  nv.width   = wrap.offsetWidth  || 360;
-  nv.height  = wrap.offsetHeight || 360;
-}
-window.addEventListener('resize', resizeNetViz);
-resizeNetViz();
+      nvnodes[0].x = cx;
+      nvnodes[0].y = cy;
 
-// Generate nodes distributed around the center
-const nvnodes     = [];
-const nvNodeCount = 18;
-for (let i = 0; i < nvNodeCount; i++) {
-  const angle  = (i / nvNodeCount) * Math.PI * 2;
-  const radius = 80 + Math.random() * 80;
-  nvnodes.push({
-    x:     nv.width  / 2 + Math.cos(angle) * radius,
-    y:     nv.height / 2 + Math.sin(angle) * radius,
-    vx:    (Math.random() - 0.5) * 0.3,
-    vy:    (Math.random() - 0.5) * 0.3,
-    r:     Math.random() * 3 + 2,
-    pulse: Math.random() * Math.PI * 2,
-    type:  i % 3 === 0 ? 'hub' : 'node'
-  });
-}
-// Central hub node
-nvnodes.push({ x: nv.width / 2, y: nv.height / 2, vx: 0, vy: 0, r: 6, pulse: 0, type: 'hub' });
+      nvnodes.slice(1).forEach(n => {
+        const t = (Math.sin(nvphase + n.phase) * .5 + .5);
+        const px = cx + (n.x - cx) * t;
+        const py = cy + (n.y - cy) * t;
 
-let nvphase         = 0;
-let isNetVizVisible = false;
-let netVizAnimFrame;
-let netVizRunning   = false;
-
-function drawNetViz() {
-  if (!isNetVizVisible) return;
-  nvctx.clearRect(0, 0, nv.width, nv.height);
-  nvphase += 0.025;
-
-  const cx = nv.width / 2, cy = nv.height / 2;
-
-  // Update node positions (skip the fixed center hub)
-  nvnodes.forEach(n => {
-    if (n.type === 'hub' && n.x === cx && n.y === cy) return;
-    n.x += n.vx; n.y += n.vy; n.pulse += 0.02;
-    const dx = n.x - cx, dy = n.y - cy;
-    const d  = Math.sqrt(dx * dx + dy * dy);
-    if (d > 150) { n.vx -= dx * 0.001; n.vy -= dy * 0.001; }
-    if (d <  60) { n.vx += dx * 0.002; n.vy += dy * 0.002; }
-    if (n.x < 20 || n.x > nv.width  - 20) n.vx *= -1;
-    if (n.y < 20 || n.y > nv.height - 20) n.vy *= -1;
-  });
-
-  // Draw connections
-  for (let i = 0; i < nvnodes.length; i++) {
-    for (let j = i + 1; j < nvnodes.length; j++) {
-      const dx   = nvnodes[i].x - nvnodes[j].x;
-      const dy   = nvnodes[i].y - nvnodes[j].y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 120) {
-        const alpha = (1 - dist / 120) * 0.25;
-        const grad  = nvctx.createLinearGradient(nvnodes[i].x, nvnodes[i].y, nvnodes[j].x, nvnodes[j].y);
-        grad.addColorStop(0, `rgba(124,58,237,${alpha})`);
-        grad.addColorStop(1, `rgba(244,114,182,${alpha})`);
-        nvctx.strokeStyle = grad;
-        nvctx.lineWidth   = 0.8;
+        nvctx.strokeStyle = `rgba(167,139,250,0.5)`;
+        nvctx.lineWidth = 0.8;
+        nvctx.setLineDash([4,4]);
         nvctx.beginPath();
-        nvctx.moveTo(nvnodes[i].x, nvnodes[i].y);
-        nvctx.lineTo(nvnodes[j].x, nvnodes[j].y);
+        nvctx.moveTo(cx, cy);
+        nvctx.lineTo(n.x, n.y);
         nvctx.stroke();
-      }
+
+        nvctx.setLineDash([]);
+        nvctx.fillStyle = 'rgba(244,114,182,0.9)';
+        nvctx.beginPath();
+        nvctx.arc(px, py, 3, 0, Math.PI * 2);
+        nvctx.fill();
+
+        nvctx.fillStyle = `rgba(124,58,237,${0.5 + Math.sin(nvphase + n.phase) * 0.3})`;
+        nvctx.beginPath();
+        nvctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        nvctx.fill();
+
+        nvctx.fillStyle = 'rgba(167,139,250,0.8)';
+        nvctx.beginPath();
+        nvctx.arc(n.x, n.y, n.r * 0.5, 0, Math.PI * 2);
+        nvctx.fill();
+
+        nvctx.fillStyle = 'rgba(200,200,220,0.5)';
+        nvctx.font = '10px Inter';
+        nvctx.fillText(n.label, n.x + n.r + 4, n.y + 4);
+      });
+
+      const grad = nvctx.createRadialGradient(cx, cy, 0, cx, cy, 20);
+      grad.addColorStop(0, 'rgba(124,58,237,0.9)');
+      grad.addColorStop(1, 'rgba(124,58,237,0.2)');
+      nvctx.fillStyle = grad;
+      nvctx.beginPath();
+      nvctx.arc(cx, cy, 16, 0, Math.PI * 2);
+      nvctx.fill();
+
+      nvctx.fillStyle = 'rgba(220,210,255,0.95)';
+      nvctx.beginPath();
+      nvctx.arc(cx, cy, 8, 0, Math.PI * 2);
+      nvctx.fill();
+
+      nvctx.fillStyle = 'rgba(180,170,240,0.7)';
+      nvctx.font = 'bold 10px Inter';
+      nvctx.textAlign = 'center';
+      nvctx.fillText('You', cx, cy + 24);
+      nvctx.textAlign = 'left';
+
+      requestAnimationFrame(drawNetViz);
     }
-  }
+    drawNetViz();
 
-  // Draw nodes
-  nvnodes.forEach(n => {
-    const p    = 0.5 + Math.sin(n.pulse + nvphase) * 0.3;
-    const size = n.type === 'hub' ? n.r * 5 : n.r * 3;
-    const glow = nvctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, size);
-    glow.addColorStop(0, `rgba(167,139,250,${p * 0.7})`);
-    glow.addColorStop(1, 'transparent');
-    nvctx.fillStyle = glow;
-    nvctx.beginPath();
-    nvctx.arc(n.x, n.y, size, 0, Math.PI * 2);
-    nvctx.fill();
-
-    nvctx.fillStyle = n.type === 'hub'
-      ? `rgba(244,114,182,${0.8 + Math.sin(n.pulse) * 0.2})`
-      : `rgba(200,180,255,${0.6 + Math.sin(n.pulse) * 0.4})`;
-    nvctx.beginPath();
-    nvctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-    nvctx.fill();
-  });
-
-  netVizAnimFrame = requestAnimationFrame(drawNetViz);
-  netVizRunning   = true;
-}
-
-createVisibilityObserver(nv, (visible) => {
-  isNetVizVisible = visible;
-  if (visible && !netVizRunning) drawNetViz();
-  else if (!visible) { cancelAnimationFrame(netVizAnimFrame); netVizRunning = false; }
-});
-
-// ─── Steps interaction ───────────────────────────────────────────────────────
-document.querySelectorAll('.step').forEach(s => {
-  s.addEventListener('click', () => {
-    document.querySelectorAll('.step').forEach(x => x.classList.remove('active'));
-    s.classList.add('active');
-  });
-});
-</script>
+    // Steps interaction
+    document.querySelectorAll('.step').forEach(s => {
+      s.addEventListener('click', () => {
+        document.querySelectorAll('.step').forEach(x => x.classList.remove('active'));
+        s.classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>

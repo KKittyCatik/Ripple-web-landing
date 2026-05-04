@@ -183,11 +183,9 @@
     }
 
     /* ── SHARED SECTION STYLES ── */
-    .section { padding: 100px 48px; }
-    .how-section  { padding: 100px 48px; background: var(--bg2); }
-    .preview-section { padding: 100px 48px; }
-    .netviz-section  { padding: 100px 48px; background: var(--bg2); }
-    .cta-section  { padding: 100px 48px; text-align: center; position: relative; overflow: hidden; }
+    .section, .how-section, .preview-section, .netviz-section, .cta-section { padding: 100px 48px; }
+    .how-section, .netviz-section { background: var(--bg2); }
+    .cta-section { text-align: center; position: relative; overflow: hidden; }
 
     .section-header {
       text-align: center;
@@ -392,7 +390,9 @@
       .sidebar {
         border-right: none;
         border-bottom: 0.5px solid var(--border);
+        width: 100%;
       }
+      .app-body { flex-direction: column; height: auto; }
 
       .section,
       .how-section,
@@ -410,6 +410,14 @@
         padding: 32px 24px;
       }
       .footer-links { flex-wrap: wrap; justify-content: center; }
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 36px; }
+      h2 { font-size: 28px; }
+      .hero-desc { font-size: 16px; }
+      .btn-primary, .btn-secondary { width: 100%; }
+      .hstat { padding: 16px 24px; }
     }
   </style>
 </head>

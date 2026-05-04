@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><style>
+    #light-icon {
+      display: inline;
+    }
+    #dark-icon {
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #light-icon {
+        display: none;
+      }
+      #dark-icon {
+        display: inline;
+      }
+    }
+  </style><g id="light-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><g><g transform="matrix(71.42857142857143,0,0,71.42857142857143,0,0)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="none" width="14" height="14"><defs>
+    <!-- Gradient как у Stripe/modern SaaS -->
+    <linearGradient id="g1" x1="0" y1="0" x2="14" y2="14">
+      <stop offset="0%" stop-color="#7C3AED"></stop>
+      <stop offset="50%" stop-color="#4F46E5"></stop>
+      <stop offset="100%" stop-color="#EC4899"></stop>
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="0.8" result="blur"></feGaussianBlur>
+      <feMerge>
+        <feMergeNode in="blur"></feMergeNode>
+        <feMergeNode in="SourceGraphic"></feMergeNode>
+      </feMerge>
+    </filter>
+  </defs><line x1="7" y1="4" x2="2" y2="10" stroke="url(#g1)" stroke-width="0.8" opacity="0.6"></line><line x1="7" y1="4" x2="12" y2="10" stroke="url(#g1)" stroke-width="0.8" opacity="0.6"></line><line x1="2" y1="10" x2="12" y2="10" stroke="url(#g1)" stroke-width="0.8" opacity="0.6"></line><circle cx="7" cy="4" r="2" fill="url(#g1)" filter="url(#glow)"></circle><circle cx="2" cy="10" r="1.5" fill="url(#g1)" opacity="0.9" filter="url(#glow)"></circle><circle cx="12" cy="10" r="1.5" fill="url(#g1)" opacity="0.9" filter="url(#glow)"></circle></svg></g></g></svg></g><g id="dark-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><g><g transform="matrix(71.42857142857143,0,0,71.42857142857143,0,0)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="none" width="14" height="14"><defs>
+    <!-- Gradient как у Stripe/modern SaaS -->
+    <linearGradient id="g1" x1="0" y1="0" x2="14" y2="14">
+      <stop offset="0%" stop-color="#7C3AED"></stop>
+      <stop offset="50%" stop-color="#4F46E5"></stop>
+      <stop offset="100%" stop-color="#EC4899"></stop>
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="0.8" result="blur"></feGaussianBlur>
+      <feMerge>
+        <feMergeNode in="blur"></feMergeNode>
+        <feMergeNode in="SourceGraphic"></feMergeNode>
+      </feMerge>
+    </filter>
+  </defs><line x1="7" y1="4" x2="2" y2="10" stroke="url(#g1)" stroke-width="0.8" opacity="0.6"></line><line x1="7" y1="4" x2="12" y2="10" stroke="url(#g1)" stroke-width="0.8" opacity="0.6"></line><line x1="2" y1="10" x2="12" y2="10" stroke="url(#g1)" stroke-width="0.8" opacity="0.6"></line><circle cx="7" cy="4" r="2" fill="url(#g1)" filter="url(#glow)"></circle><circle cx="2" cy="10" r="1.5" fill="url(#g1)" opacity="0.9" filter="url(#glow)"></circle><circle cx="12" cy="10" r="1.5" fill="url(#g1)" opacity="0.9" filter="url(#glow)"></circle></svg></g></g></svg></g></svg>
